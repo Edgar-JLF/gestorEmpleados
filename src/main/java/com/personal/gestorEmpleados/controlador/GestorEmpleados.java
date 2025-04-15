@@ -1,6 +1,8 @@
 package com.personal.gestorEmpleados.controlador;
 import com.personal.gestorEmpleados.modelo.Empleados;
+import com.personal.gestorEmpleados.controlador.DatabaseConnection;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -8,65 +10,132 @@ import java.util.List;
 public class GestorEmpleados {
     private List<Empleados> empleados = new ArrayList<>();
     public void guardarEmpleado(Empleados empleado){
-        empleados.add(empleado);
-        System.out.println(String.format("El empleado %s, fue guardado con éxito", empleado.getNombre()));
+        String sql = "INSERT INTO empleados (nombre, puesto, salario) VALUES (?, ?, ?)";
+
+        try(Connection conn = DatabaseConnection.conectar();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+
+            pstmt.setString(1, empleado.getNombre());
+            pstmt.setString(2, empleado.getPuesto());
+            pstmt.setDouble(3, empleado.getSalario());
+
+            pstmt.executeUpdate();
+            System.out.println("Empleado guardado en a base de datos con éxito.");
+
+        }catch (SQLException e){
+            System.out.println("Error al guardar el empleado en la base de datos: " + e.getMessage());
+        }
+
     }
 
     public void mostrarEmpleados(){
-        if(empleados.isEmpty()){
-            System.out.println("No hay empleados registrados.");
-            return;
-        }
+        String sql = "SELECT * FROM empleados";
 
-        for (Empleados empleado : empleados) {
-            System.out.println(empleado);
-            System.out.println("--------------------");
-        }
+        try(Connection conn = DatabaseConnection.conectar();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)){
 
+            boolean hayResultados = false;
+            while (rs.next()){
+                hayResultados = true;
+                int id = rs.getInt("id");
+                String nombre = rs.getString("nombre");
+                String puesto = rs.getString("puesto");
+                double salario = rs.getDouble("salario");
+
+                System.out.println("ID: " + id);
+                System.out.println("Nombre: " + nombre);
+                System.out.println("Puesto: " + puesto);
+                System.out.println("Salario: " + salario);
+                System.out.println("--------------------");
+            }
+
+            if (!hayResultados){
+                System.out.println("No hay empleados registrados en la base de datos.");
+            }
+
+        }catch (SQLException e){
+            System.out.println("Error al mostrar los empleados: " + e.getMessage());
+        }
     }
 
     public void buscarEmpleado(String nombre){
-        for (Empleados empleado : empleados){
-            if(empleado.getNombre().equalsIgnoreCase(nombre)){ //Verifica si el nombre del empleado es igual al nombre ingresado
-                System.out.println(empleado);
-                return;
+        String sql = "SELECT * FROM empleados WHERE LOWER(nombre) = LOWER(?)";
+
+        try(Connection conn = DatabaseConnection.conectar();
+        PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setString(1, nombre);
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()){
+                int id = rs.getInt("id");
+                String puesto = rs.getString("puesto");
+                double salario = rs.getDouble("salario");
+                System.out.println("Empleado encontrado: ");
+                System.out.println("ID: " + id);
+                System.out.println("Nombre: " + nombre);
+                System.out.println("Puesto: " + puesto);
+                System.out.println("Salario: " + salario);
+            }else{
+                System.out.println("El empleado '" + nombre + "' no fue encontrado.");
             }
+        } catch (SQLException e){
+            System.out.println("Error al buscar el empleado: " + e.getMessage());
         }
-        System.out.println(String.format("El empleado %s no encontrado. ", nombre));
 
     }
 
-    public double calcularSalarioPromedio(){
-        if (empleados.isEmpty()) return 0;
-        double total = 0;
-        for(Empleados empleado : empleados){
-            total += empleado.getSalario();
+    public void calcularSalarioPromedio(){
+        String sql = "SELECT AVG(salario) AS promedio FROM empleados";
+        try(Connection conn = DatabaseConnection.conectar();
+        PreparedStatement stmt = conn.prepareStatement(sql)){
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()){
+                double promedio = rs.getDouble("promedio");
+                System.out.printf("El salrio promedio de los empleados es: $%.2f%n", promedio);
+            } else{
+                System.out.println("No hay empleados para calculare el promedio.");
+            }
+        }catch (SQLException e){
+            System.out.println("Error al calcular el salario promedio: " + e.getMessage());
         }
-        return total / empleados.size();
     }
 
     public void actualizarEmpleado(String nombre, String nuevoPuesto, double nuevoSalario){
-        for (Empleados empleado: empleados){
-            if(empleado.getNombre().equalsIgnoreCase(nombre)){
-                empleado.setPuesto(nuevoPuesto);
-                empleado.setSalario(nuevoSalario);
+        String sql = "UPDATE empleados SET puesto = ?, salario = ? WHERE LOWER(nombre) = LOWER(?)";
+
+        try(Connection conn = DatabaseConnection.conectar();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, nuevoPuesto);
+            stmt.setDouble(2, nuevoSalario);
+            stmt.setString(3, nombre);
+
+            int filasActualizadas = stmt.executeUpdate();
+
+            if (filasActualizadas > 0){
                 System.out.println("Empleado actualizado con éxito.");
-                return;
+            } else {
+                System.out.println("Empleado no encontrado.");
             }
+
+        }catch (SQLException e){
+            System.out.println("Error al actualizar el empleado: " + e.getMessage());
         }
-        System.out.println("Empleado no encontrado.");
     }
 
     public void eliminarEmpleado(String nombre){
-        Iterator<Empleados> iterator = empleados.iterator();
-        while(iterator.hasNext()){
-            Empleados empleado = iterator.next();
-            if(empleado.getNombre().equalsIgnoreCase(nombre)){
-                iterator.remove();
+        String sql = "DELETE FROM empleados WHERE LOWER(nombre) = LOWER(?)";
+        try(Connection conn = DatabaseConnection.conectar();
+        PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setString(1, nombre);
+            int filasEliminadas = stmt.executeUpdate();
+
+            if(filasEliminadas > 0){
                 System.out.println("Empleado eliminado con éxito.");
-                return;
+            }else {
+                System.out.println("Error al eliminar el empleado: " + nombre);
             }
+        }catch (SQLException e){
+            System.out.println("Error al eliminar el empleado: " + e.getMessage());
         }
-        System.out.println("Empleado no encontrado.");
     }
 }

@@ -1,5 +1,6 @@
 package com.personal.gestorEmpleados.vista;
 
+import com.personal.gestorEmpleados.controlador.DatabaseConnection;
 import com.personal.gestorEmpleados.controlador.GestorEmpleados;
 import com.personal.gestorEmpleados.modelo.Empleados;
 import java.util.Scanner;
@@ -29,6 +30,9 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         GestorEmpleados empleados = new GestorEmpleados();
         boolean continuar = true;
+
+        // Crear la tabla si no existe
+        DatabaseConnection.crearTabla();
 
         while (continuar) {
             System.out.println("Bienvenido al sistema de gestion de empleados");
@@ -64,7 +68,7 @@ public class Main {
                     break;
 
                 case 4:
-                    System.out.printf("El salario promedio de los empleados es: %.2f%n", empleados.calcularSalarioPromedio());
+                    empleados.calcularSalarioPromedio();
                     break;
 
                 case 5:
