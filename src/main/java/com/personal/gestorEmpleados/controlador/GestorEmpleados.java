@@ -2,9 +2,10 @@ package com.personal.gestorEmpleados.controlador;
 import com.personal.gestorEmpleados.modelo.Empleados;
 import com.personal.gestorEmpleados.controlador.DatabaseConnection;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class GestorEmpleados {
@@ -136,6 +137,28 @@ public class GestorEmpleados {
             }
         }catch (SQLException e){
             System.out.println("Error al eliminar el empleado: " + e.getMessage());
+        }
+    }
+
+    public void exportarEmpleadosAArchivo(String rutaArchivo){
+        String sql = "SELECT nombre, puesto, salario FROM empleados";
+        try(Connection conn = DatabaseConnection.conectar();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            FileWriter escritor = new FileWriter(rutaArchivo)){
+                escritor.write("Nombre,Puesto,Salario\n");
+                while (rs.next()){
+                    String nombre = rs.getString("nombre");
+                    String puesto = rs.getString("puesto");
+                    double salario = rs.getDouble("salario");
+                    escritor.write(String.format("%s,%s,%.2f\n", nombre, puesto, salario));
+                }
+            System.out.println("Empleados exportados a " + rutaArchivo);
+
+        } catch (SQLException e){
+            System.out.println("Error al obtener empleados: " + e.getMessage());
+        }catch (IOException e){
+            System.out.println("Error al escribir el Archivo: " + e.getMessage());
         }
     }
 }

@@ -43,7 +43,8 @@ public class Main {
             System.out.println("4. Calcular salario promedio");
             System.out.println("5. Actualizar empleado");
             System.out.println("6. Eliminar empleado");
-            System.out.println("7. Salir");
+            System.out.println("7. Exportar empleados a archivo");
+            System.out.println("8. Salir");
 
             int opcion;
             try {
@@ -97,6 +98,12 @@ public class Main {
                     break;
 
                 case 7:
+                    System.out.println("Ingrese la ruta del archivo donde desea exportar (por ejemplo, empleados.csv): ");
+                    String rutaArchivo = sc.nextLine();
+                    empleados.exportarEmpleadosAArchivo(rutaArchivo);
+                    break;
+
+                case 8:
                     System.out.println("Saliendo del sistema...");
                     continuar = false;
                     break;
