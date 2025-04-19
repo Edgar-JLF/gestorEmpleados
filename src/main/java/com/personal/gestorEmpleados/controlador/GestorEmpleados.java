@@ -1,6 +1,6 @@
 package com.personal.gestorEmpleados.controlador;
-import com.personal.gestorEmpleados.modelo.Empleados;
-import com.personal.gestorEmpleados.controlador.DatabaseConnection;
+import com.personal.gestorEmpleados.modelo.Empleado;
+
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GestorEmpleados {
-    private List<Empleados> empleados = new ArrayList<>();
-    public void guardarEmpleado(Empleados empleado){
+    private List<Empleado> empleados = new ArrayList<>();
+    public void guardarEmpleado(Empleado empleado){
         String sql = "INSERT INTO empleados (nombre, puesto, salario) VALUES (?, ?, ?)";
 
         try(Connection conn = DatabaseConnection.conectar();
@@ -62,6 +62,7 @@ public class GestorEmpleados {
 
     public void buscarEmpleado(String nombre){
         String sql = "SELECT * FROM empleados WHERE LOWER(nombre) = LOWER(?)";
+
 
         try(Connection conn = DatabaseConnection.conectar();
         PreparedStatement stmt = conn.prepareStatement(sql)){
@@ -153,7 +154,7 @@ public class GestorEmpleados {
                     double salario = rs.getDouble("salario");
                     escritor.write(String.format("%s,%s,%.2f\n", nombre, puesto, salario));
                 }
-            System.out.println("Empleados exportados a " + rutaArchivo);
+            System.out.println("Empleado exportados a " + rutaArchivo);
 
         } catch (SQLException e){
             System.out.println("Error al obtener empleados: " + e.getMessage());

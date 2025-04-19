@@ -2,11 +2,12 @@ package com.personal.gestorEmpleados.vista;
 
 import com.personal.gestorEmpleados.controlador.DatabaseConnection;
 import com.personal.gestorEmpleados.controlador.GestorEmpleados;
-import com.personal.gestorEmpleados.modelo.Empleados;
+import com.personal.gestorEmpleados.modelo.Empleado;
+
 import java.util.Scanner;
 
 public class Main {
-    private static Empleados capturarEmpleado(Scanner sc){
+    private static Empleado capturarEmpleado(Scanner sc){
         System.out.println("Ingrese el nombre del empleado: ");
         String nombre = sc.nextLine();
         System.out.println("Ingrese el puesto del empleado: ");
@@ -24,7 +25,7 @@ public class Main {
             }
         }
 
-        return new Empleados(nombre, puesto, salario);
+        return new Empleado(nombre, puesto, salario);
     }
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);

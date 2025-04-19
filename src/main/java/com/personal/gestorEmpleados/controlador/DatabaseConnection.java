@@ -26,17 +26,27 @@ public class DatabaseConnection {
                 "puesto VARCHAR(50) NOT NULL," +
                 "salario DECIMAL(10, 2) NOT NULL)";
 
-        try (Connection conn = conectar()) {
+        Connection conn = null;
+        Statement stmt = null;
+
+        try {
+            conn = conectar();
             if (conn != null) {
-                try (Statement stmt = conn.createStatement()) {
-                    stmt.executeUpdate(sql);
-                    System.out.println("Tabla 'empleados' verificada/creada.");
-                }
+                stmt = conn.createStatement();
+                stmt.executeUpdate(sql);
+                System.out.println("Tabla 'empleados' verificada/creada.");
             } else {
                 System.out.println("No se pudo crear la tabla porque la conexión es nula.");
             }
         } catch (SQLException e) {
             System.out.println("Error al crear la tabla: " + e.getMessage());
+        } finally {
+            try {
+                if(stmt != null) stmt.close();
+                if(conn != null) conn.close();
+            }catch (SQLException e){
+                System.out.println("Error al cerrar recursos: " + e.getMessage());
+            }
         }
     }
 }

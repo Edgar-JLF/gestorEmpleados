@@ -1,11 +1,11 @@
 package com.personal.gestorEmpleados.modelo;
 
-public class Empleados {
+public class Empleado {
     private String nombre;
     private String puesto;
     private double salario;
 
-    public Empleados(String nombre, String puesto, double salario){
+    public Empleado(String nombre, String puesto, double salario){
         this.nombre = nombre;
         this.puesto = puesto;
         this.salario = salario;
